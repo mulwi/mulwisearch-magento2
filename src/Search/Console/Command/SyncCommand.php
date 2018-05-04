@@ -117,7 +117,7 @@ class SyncCommand extends Command
             $valid = false;
         }
 
-        if (!$this->config->getApplicationKey()) {
+        if (!$this->config->getApiKey()) {
             $output->writeln("<error>Application Key is not set</error>");
             $valid = false;
         }

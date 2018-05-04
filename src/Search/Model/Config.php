@@ -29,9 +29,9 @@ class Config
     /**
      * @return string
      */
-    public function getApplicationDomain()
+    public function getWorkspaceUrl()
     {
-        return $this->scopeConfig->getValue('mulwi/general/domain');
+        return $this->scopeConfig->getValue('mulwi/general/workspace_url');
     }
 
     /**
@@ -45,9 +45,8 @@ class Config
     /**
      * @return string
      */
-    public function getApplicationKey()
+    public function getApiKey()
     {
-
         return $this->encryptor->decrypt(
             $this->scopeConfig->getValue('mulwi/general/application_key')
         );
@@ -59,13 +58,5 @@ class Config
     public function getApiUrl()
     {
         return $this->scopeConfig->getValue('mulwi/general/api_url');
-    }
-
-    /**
-     * @return string
-     */
-    public function getAppUrl()
-    {
-        return $this->scopeConfig->getValue('mulwi/general/app_url');
     }
 }

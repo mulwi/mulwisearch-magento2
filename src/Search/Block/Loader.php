@@ -33,9 +33,14 @@ class Loader extends Template
         return $this->config;
     }
 
-    public function getAppUrl()
+    public function getLoaderUrl()
     {
-        return "//" . $this->config->getApplicationDomain() . '.' . $this->config->getAppUrl();
+        return $this->getBaseUrl() . "/backend/static/loader.js";
+    }
+
+    public function getBaseUrl()
+    {
+        return rtrim($this->config->getWorkspaceUrl(), "/");
     }
 
     public function getRedirectUrl()

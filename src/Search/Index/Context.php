@@ -50,7 +50,7 @@ class Context
     {
         $this->client = new \Mulwi\Client(
             $config->getApplicationID(),
-            $config->getApplicationKey(),
+            $config->getApiKey(),
             $config->getApiUrl()
         );
 

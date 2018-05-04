@@ -2,8 +2,8 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
     <system>
-        <section id="mulwi" translate="label" type="text" sortOrder="1100" showInDefault="1">
-            <label>Search</label>
+        <section id="mulwi" translate="label" type="text" sortOrder="900" showInDefault="1">
+            <label>Mulwi Search</label>
             <tab>general</tab>
             <resource>Mulwi_Search::config_mulwi</resource>
             <group id="general" translate="label" type="text" showInDefault="1">
@@ -12,32 +12,36 @@
                     <label>Enable Search</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
-                <field id="domain" translate="label comment" type="text" sortOrder="15" showInDefault="1">
-                    <label>Application domain</label>
-                    <comment></comment>
+                <field id="workspace_url" translate="label comment" type="text" sortOrder="15" showInDefault="1">
+                    <label>Workspace URL</label>
+                    <comment>
+                        <![CDATA[
+                            Your workspace URL, that was used for registration.
+                            <br>Ex: https://space.mulwi.com/
+                            <br>Need a new Mulwi account? <a href="https://mulwi.com/a/register" target="_blank">Click here to get one</a>
+                        ]]>
+                    </comment>
                 </field>
                 <field id="application_id" translate="label comment" type="text" sortOrder="20" showInDefault="1">
                     <label>Application ID</label>
-                    <comment>...</comment>
+                    <comment>
+                        <![CDATA[
+                            You can find your Application ID and API key in <a href="https://mulwi.com/backend/keys" target="_blank">API Keys</a> section of your Mulwi account.
+                        ]]>
+                    </comment>
                 </field>
                 <field id="application_key" translate="label comment" type="obscure" sortOrder="40" showInDefault="1">
                     <label>API Key</label>
                     <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
-                    <comment>...</comment>
+                    <comment>
+                        <![CDATA[
+                            Your administration API key.
+                            <br>You can find your API key in <a href="https://mulwi.com/backend/keys" target="_blank">API Keys</a> section of your Mulwi account.
+                        ]]>
+                    </comment>
                 </field>
                 <field id="api_url" translate="label" type="text" sortOrder="50" showInDefault="1" canRestore="1">
                     <label>Search API URL</label>
-                </field>
-                <field id="app_url" translate="label comment" type="text" sortOrder="60" showInDefault="1"
-                       canRestore="1">
-                    <label>Search URL</label>
-                </field>
-            </group>
-            <group id="cron" translate="label" type="text" sortOrder="20" showInDefault="1">
-                <label>Cron</label>
-                <field id="enable_cron" translate="label" type="select" sortOrder="10" showInDefault="1">
-                    <label>Enable Cron</label>
-                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
             </group>
         </section>
