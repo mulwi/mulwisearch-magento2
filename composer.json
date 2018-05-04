@@ -7,9 +7,7 @@
   },
   "type": "magento2-module",
   "version": "0.0.1",
-  "license": [
-    "proprietary"
-  ],
+  "license": "MIT",
   "autoload": {
     "files": [
       "src/Search/registration.php"
