@@ -1,4 +1,4 @@
-Mulwi Search for Magento 2
+[Mulwi Search](https://mulwi.com/) for Magento 2
 ==================
 
 Installation
