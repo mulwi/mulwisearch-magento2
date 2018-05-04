@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+
+    <type name="Mulwi\Search\Repository\IndexRepository">
+        <arguments>
+            <argument name="indexes" xsi:type="array">
+                <item name="magento_order" xsi:type="object">Mulwi\Search\Index\Magento\OrderIndex</item>
+                <item name="magento_invoice" xsi:type="object">Mulwi\Search\Index\Magento\InvoiceIndex</item>
+                <item name="magento_credit_memo" xsi:type="object">Mulwi\Search\Index\Magento\CreditMemoIndex</item>
+                <item name="magento_product" xsi:type="object">Mulwi\Search\Index\Magento\ProductIndex</item>
+                <item name="magento_category" xsi:type="object">Mulwi\Search\Index\Magento\CategoryIndex</item>
+                <item name="magento_customer" xsi:type="object">Mulwi\Search\Index\Magento\CustomerIndex</item>
+                <item name="magento_shipment" xsi:type="object">Mulwi\Search\Index\Magento\ShipmentIndex</item>
+                <item name="mirasvit_ticket" xsi:type="object">Mulwi\Search\Index\Mirasvit\TicketIndex</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <!-- CLI Commands -->
+    <type name="Magento\Framework\Console\CommandListInterface">
+        <arguments>
+            <argument name="commands" xsi:type="array">
+                <item name="SearchSyncCommand" xsi:type="object">Mulwi\Search\Console\Command\SyncCommand</item>
+            </argument>
+        </arguments>
+    </type>
+</config>

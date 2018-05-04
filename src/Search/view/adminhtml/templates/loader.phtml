@@ -1,0 +1,32 @@
+<?php
+/** @var \Mulwi\Search\Block\Loader $block */
+?>
+
+
+<script type="text/javascript">
+    var mulwi = {
+        applicationID:  "<?= $block->getConfig()->getApplicationID() ?>",
+        applicationKey: "<?= $block->getConfig()->getApplicationKey() ?>",
+        baseURL:        "<?= $block->getAppUrl() ?>",
+        apiURL:         "<?= $block->getConfig()->getApiUrl() ?>",
+        display:        "iframe",
+        activator:      {
+            selector: ".search-global .search-global-label",
+            event:    "click",
+            prevent:  true
+        },
+        variables:      {
+            url: '<?=$block->getRedirectUrl() ?>'
+        }
+    };
+
+    (function (win, doc, type, src) {
+        var node = doc.createElement(type);
+        node.async = 1;
+        node.src = src;
+
+        var e = doc.getElementsByTagName(type)[0];
+
+        e.parentNode.insertBefore(node, e);
+    })(window, document, "script", "<?= $block->getAppUrl() ?>/backend/static/loader.js");
+</script>

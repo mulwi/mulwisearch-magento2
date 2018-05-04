@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <mulwi>
+            <general>
+                <enable>1</enable>
+                <api_url>https://mulwi.com/api/v1/</api_url>
+                <app_url>https://mulwi.com/</app_url>
+            </general>
+            <cron>
+                <enable_cron>1</enable_cron>
+            </cron>
+        </mulwi>
+    </default>
+</config>
