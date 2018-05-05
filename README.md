@@ -8,7 +8,7 @@ The easiest way to install the extension is to use [Composer](https://getcompose
 
 Run the following commands:
 
-- ```$ composer require mulwi/mulwisearch-magento-2```
+- ```$ composer require mulwi/mulwisearch-magento2```
 - ```$ bin/magento module:enable Mulwi_Search```
 - ```$ bin/magento setup:upgrade && bin/magento setup:static-content:deploy```
 
