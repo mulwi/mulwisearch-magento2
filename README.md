@@ -1,26 +1,19 @@
-# Installation
+[Mulwi Search](https://mulwi.com/) for Magento 2
+==================
 
-**PHP client library**
+Installation
+------------
 
-```
-composer config repositories.mulwi-client-php vcs https://github.com/mulwi/client-php
-composer require mulwi/client-php:dev-master
-```
+The easiest way to install the extension is to use [Composer](https://getcomposer.org/).
 
+Run the following commands:
 
-**Magento 2 module**
+- ```$ composer require mulwi/mulwisearch-magento-2```
+- ```$ bin/magento module:enable Mulwi_Search```
+- ```$ bin/magento setup:upgrade && bin/magento setup:static-content:deploy```
 
-```
-composer config repositories.mulwi-magento2 vcs https://github.com/mulwi/mulwisearch-magento2
-composer require mulwi/mulwisearch-magento2:dev-master
+CLI
+---
 
-bin/magento module:enable Mulwi_Search
-bin/magento setup:upgrade
-```
+- ```$ bin/magento mulwi:sync```
 
-
-**CLI**
-
-```
-bin/magento mulwi:sync
-```
