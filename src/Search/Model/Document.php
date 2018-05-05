@@ -1,17 +1,29 @@
 <?php
 
-namespace Mulwi\Search\Index;
+namespace Mulwi\Search\Model;
 
 use Magento\Framework\DataObject;
+use Mulwi\Search\Api\Data\DocumentInterface;
 
-class Document extends DataObject
+class Document extends DataObject implements DocumentInterface
 {
     public function __construct(array $data = [])
     {
+        $data['source'] = Config::SOURCE;
         $data['meta'] = [];
         $data['relations'] = [];
 
         parent::__construct($data);
+    }
+
+    public function getId()
+    {
+        return $this->getData('id');
+    }
+
+    public function setId($value)
+    {
+        return $this->setData('id', $value);
     }
 
     public function setExtID($value)
@@ -64,19 +76,19 @@ class Document extends DataObject
         return $this->setData('meta', $meta);
     }
 
-    public function addRelation($source, $extID)
+    public function addRelation($kind, $id)
     {
         $relations = $this->getData('relations');
         $relations[] = [
-            'source' => $source,
-            'extID' => $extID,
+            'source' => Config::SOURCE,
+            'extID' => $kind . '_' . $id,
         ];
 
         return $this->setData('relations', $relations);
     }
 
-    public function addContent($content)
+    public function addSearchable($content)
     {
-        return $this->setData('content', $this->getData('content') . ' ' . $content);
+        return $this->setData('searchable', $this->getData('searchable') . ' ' . $content);
     }
 }

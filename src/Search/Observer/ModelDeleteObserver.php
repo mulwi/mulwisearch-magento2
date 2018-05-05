@@ -15,6 +15,6 @@ class ModelDeleteObserver extends AbstractObserver implements ObserverInterface
         /** @var \Magento\Framework\Model\AbstractModel $object */
         $object = $observer->getObject();
 
-        $this->indexRepository->deleteDocument($object);
+        $this->queueService->deleteDocument($object);
     }
 }

@@ -2,18 +2,19 @@
 
 namespace Mulwi\Search\Observer;
 
-use Mulwi\Search\Repository\IndexRepository;
+use Mulwi\Search\Service\QueueService;
 
 abstract class AbstractObserver
 {
     /**
-     * @var IndexRepository
+     * @var QueueService
      */
-    protected $indexRepository;
+    protected $queueService;
 
     public function __construct(
-        IndexRepository $indexRepository
-    ) {
-        $this->indexRepository = $indexRepository;
+        QueueService $queueService
+    )
+    {
+        $this->queueService = $queueService;
     }
 }

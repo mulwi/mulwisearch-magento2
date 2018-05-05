@@ -6,32 +6,50 @@ use Mulwi\Search\Index\AbstractIndex;
 
 class CreditMemoIndex extends AbstractIndex
 {
-    const IDENTIFIER = 'credit_memo';
+    const IDENTIFIER = 'Credit Memo';
 
     public function getIdentifier()
     {
         return self::IDENTIFIER;
     }
 
-    public function getEntities($lastEntityId = null, $limit = 100)
+    public function getQueueValue($entity)
     {
-        /** @var \Magento\Sales\Model\ResourceModel\Order\Creditmemo\Collection $collection */
-        $collection = $this->context->objectManager->create('Magento\Sales\Model\ResourceModel\Order\Creditmemo\Collection');
-        $collection->setPageSize($limit);
-        $collection->addFieldToFilter('entity_id', ['gt' => $lastEntityId]);
-
-        return $collection;
+        if ($entity instanceof \Magento\Sales\Model\Order\Creditmemo) {
+            return $entity->getId();
+        }
     }
 
+    public function getDocuments($lastId = null)
+    {
+        /** @var \Magento\Sales\Model\ResourceModel\Order\Creditmemo\Collection $collection */
+        $collection = $this->context->create('Magento\Sales\Model\ResourceModel\Order\Creditmemo\Collection');
+        $collection->setPageSize(100)
+            ->addFieldToFilter('entity_id', ['gt' => $lastId]);
+
+        $docs = [];
+        foreach ($collection as $entity) {
+            $docs[] = $this->mapDocument($entity);
+        }
+
+        return $docs;
+    }
+
+    public function getDocument($id)
+    {
+        return $this->mapDocument(
+            $this->context->create('Magento\Sales\Model\Order\Creditmemo')
+                ->load($id)
+        );
+    }
+
+    /**
+     * @param \Magento\Sales\Model\Order\Creditmemo $memo
+     * @return \Mulwi\Search\Model\Document
+     */
     public function mapDocument($memo)
     {
-        /** @var \Magento\Sales\Model\Order\Creditmemo $memo */
-
-        $doc = $this->makeDocument(
-            'Credit Memo',
-            $this->makeExtId(self::IDENTIFIER, $memo->getId())
-        );
-
+        $doc = $this->context->makeDocument(self::IDENTIFIER, $memo->getId());
 
         $doc->setTitle('Credit Memo #' . $memo->getIncrementId())
             ->setUrl($this->context->getUrl('sales/creditmemo/view', ['creditmemo_id' => $memo->getId()]))
@@ -63,21 +81,12 @@ class CreditMemoIndex extends AbstractIndex
             );
         }
 
-        $doc->addRelation(
-            $this->getSource(),
-            $this->makeExtId(OrderIndex::IDENTIFIER, $memo->getOrderId())
-        );
+        $doc->addRelation(OrderIndex::IDENTIFIER, $memo->getOrderId());
 
-        $doc->addRelation(
-            $this->getSource(),
-            $this->makeExtId(InvoiceIndex::IDENTIFIER, $memo->getInvoiceId())
-        );
+        $doc->addRelation(InvoiceIndex::IDENTIFIER, $memo->getInvoiceId());
 
         if ($memo->getOrder()->getCustomerId()) {
-            $doc->addRelation(
-                $this->getSource(),
-                $this->makeExtId(CustomerIndex::IDENTIFIER, $memo->getOrder()->getCustomerId())
-            );
+            $doc->addRelation(CustomerIndex::IDENTIFIER, $memo->getOrder()->getCustomerId());
         } else {
             $doc->addMeta(
                 'Customer',
@@ -87,10 +96,7 @@ class CreditMemoIndex extends AbstractIndex
 
         /** @var \Magento\Sales\Api\Data\CreditMemoItemInterface $item */
         foreach ($memo->getItems() as $item) {
-            $doc->addRelation(
-                $this->getSource(),
-                $this->makeExtId(ProductIndex::IDENTIFIER, $item->getProductId())
-            );
+            $doc->addRelation(ProductIndex::IDENTIFIER, $item->getProductId());
         }
 
         return $doc;

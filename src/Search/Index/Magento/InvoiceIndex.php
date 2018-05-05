@@ -2,43 +2,55 @@
 
 namespace Mulwi\Search\Index\Magento;
 
+use Mulwi\Search\Api\Data\DocumentInterface;
 use Mulwi\Search\Index\AbstractIndex;
 
 class InvoiceIndex extends AbstractIndex
 {
-    const IDENTIFIER = 'invoice';
+    const IDENTIFIER = 'Invoice';
 
     public function getIdentifier()
     {
         return self::IDENTIFIER;
     }
 
-    public function isAvailable()
+    public function getQueueValue($entity)
     {
-        return true;
+        if ($entity instanceof \Magento\Sales\Model\Order\Invoice) {
+            return $entity->getId();
+        }
     }
 
-    public function getEntities($lastEntityId = null, $limit = 100)
+    public function getDocuments($lastId = null)
     {
         /** @var \Magento\Sales\Model\ResourceModel\Order\Invoice\Collection $collection */
-        $collection = $this->context->objectManager->create('Magento\Sales\Model\ResourceModel\Order\Invoice\Collection');
-        $collection->setPageSize($limit);
-        $collection->addFieldToFilter('entity_id', ['gt' => $lastEntityId]);
+        $collection = $this->context->create('Magento\Sales\Model\ResourceModel\Order\Invoice\Collection');
+        $collection->setPageSize(100)
+            ->addFieldToFilter('entity_id', ['gt' => $lastId]);
 
-        return $collection;
+        $docs = [];
+        foreach ($collection as $entity) {
+            $docs[] = $this->mapDocument($entity);
+        }
+
+        return $docs;
+    }
+
+    public function getDocument($id)
+    {
+        return $this->mapDocument(
+            $this->context->create('Magento\Sales\Model\Order\Invoice')
+                ->load($id)
+        );
     }
 
     /**
-     * {@inheritdoc}
+     * @param \Magento\Sales\Model\Order\Invoice $invoice
+     * @return DocumentInterface
      */
-    public function mapDocument($invoice)
+    private function mapDocument($invoice)
     {
-        /** @var \Magento\Sales\Model\Order\Invoice $invoice */
-
-        $doc = $this->makeDocument(
-            'Invoice',
-            $this->makeExtId(self::IDENTIFIER, $invoice->getId())
-        );
+        $doc = $this->context->makeDocument(self::IDENTIFIER, $invoice->getId());
 
         $doc->setTitle('Invoice #' . $invoice->getIncrementId())
             ->setUrl($this->context->getUrl('sales/invoice/view', ['invoice_id' => $invoice->getId()]))
@@ -70,16 +82,10 @@ class InvoiceIndex extends AbstractIndex
             );
         }
 
-        $doc->addRelation(
-            $this->getSource(),
-            $this->makeExtId(OrderIndex::IDENTIFIER, $invoice->getOrderId())
-        );
+        $doc->addRelation(OrderIndex::IDENTIFIER, $invoice->getOrderId());
 
         if ($invoice->getOrder()->getCustomerId()) {
-            $doc->addRelation(
-                $this->getSource(),
-                $this->makeExtId(CustomerIndex::IDENTIFIER, $invoice->getOrder()->getCustomerId())
-            );
+            $doc->addRelation(CustomerIndex::IDENTIFIER, $invoice->getOrder()->getCustomerId());
         } else {
             $doc->addMeta(
                 'Customer',
@@ -89,10 +95,7 @@ class InvoiceIndex extends AbstractIndex
 
         /** @var \\Magento\Sales\Api\Data\InvoiceItemInterface $item */
         foreach ($invoice->getItems() as $item) {
-            $doc->addRelation(
-                $this->getSource(),
-                $this->makeExtId(ProductIndex::IDENTIFIER, $item->getProductId())
-            );
+            $doc->addRelation(ProductIndex::IDENTIFIER, $item->getProductId());
         }
 
         return $doc;

@@ -9,7 +9,7 @@ use Mulwi\Search\Index\Magento\OrderIndex;
 
 class TicketIndex extends AbstractIndex
 {
-    const IDENTIFIER = 'ticket';
+    const IDENTIFIER = 'Ticket';
 
     public function getIdentifier()
     {
@@ -21,25 +21,43 @@ class TicketIndex extends AbstractIndex
         return $this->context->moduleList->has('Mirasvit_Helpdesk');
     }
 
-    public function getEntities($lastEntityId = null, $limit = 100)
+    public function getQueueValue($entity)
     {
-        /** @var \Mirasvit\Helpdesk\Model\ResourceModel\Ticket\Collection $collection */
-        $collection = $this->context->objectManager->create('Mirasvit\Helpdesk\Model\ResourceModel\Ticket\Collection');
-        $collection->setPageSize($limit);
-        $collection->addFieldToFilter('folder', ['neq' => 3]);//not spam
-        $collection->addFieldToFilter('ticket_id', ['gt' => $lastEntityId]);
-
-        return $collection;
+        if ($entity instanceof \Mirasvit\Helpdesk\Model\Ticket) {
+            return $entity->getId();
+        }
     }
 
+    public function getDocuments($lastId = null)
+    {
+        /** @var \Mirasvit\Helpdesk\Model\ResourceModel\Ticket\Collection $collection */
+        $collection = $this->context->create('Mirasvit\Helpdesk\Model\ResourceModel\Ticket\Collection');
+        $collection->setPageSize(100)
+            ->addFieldToFilter('ticket_id', ['gt' => $lastId]);
+
+        $docs = [];
+        foreach ($collection as $entity) {
+            $docs[] = $this->mapDocument($entity);
+        }
+
+        return $docs;
+    }
+
+    public function getDocument($id)
+    {
+        return $this->mapDocument(
+            $this->context->create('Mirasvit\Helpdesk\Model\Ticket')
+                ->load($id)
+        );
+    }
+
+    /**
+     * @param \Mirasvit\Helpdesk\Model\Ticket $ticket
+     * @return \Mulwi\Search\Model\Document
+     */
     public function mapDocument($ticket)
     {
-        /** @var \Mirasvit\Helpdesk\Model\Ticket $ticket */
-
-        $doc = $this->makeDocument(
-            'Ticket',
-            $this->makeExtId(self::IDENTIFIER, $ticket->getId())
-        );
+        $doc = $this->context->makeDocument(self::IDENTIFIER, $ticket->getId());
 
         $doc->setTitle($ticket->getSubject())
             ->setUrl($this->context->getUrl('helpdesk/ticket/edit', ['id' => $ticket->getId()]))
@@ -65,61 +83,10 @@ class TicketIndex extends AbstractIndex
             $ticket->getPriority()->getName()
         );
 
-        $doc->addRelation(
-            $this->getSource(),
-            $this->makeExtId(OrderIndex::IDENTIFIER, $ticket->getOrderId())
-        );
+        $doc->addRelation(OrderIndex::IDENTIFIER, $ticket->getOrderId());
 
-        $doc->addRelation(
-            $this->getSource(),
-            $this->makeExtId(CustomerIndex::IDENTIFIER, $ticket->getCustomerId())
-        );
+        $doc->addRelation(CustomerIndex::IDENTIFIER, $ticket->getCustomerId());
 
         return $doc;
-
-        echo '.';
-        $sections = [];
-        //        $messages = $entity->getMessages();
-        //        foreach ($messages as $message) {
-        //            $sections[] = [
-        //                'timestamp' => strtotime($message->getCreatedAt()),
-        //                'author'    => $message->getUserName(),
-        //                'body'      => $message->getBodyPlain(),
-        //            ];
-        //        }
-        return [
-            'extID' => $ticket->getId(),
-            'title' => $ticket->getSubject(),
-            'url' => $this->context->getUrl('catalog/product/edit', ['id' => $ticket->getId()]),
-            'type' => $this->getIdentifier(),
-            'timestamp' => strtotime($ticket->getCreatedAt()),
-            'fields' => [
-                [
-                    'field' => 'code',
-                    'value' => $ticket->getCode(),
-                ],
-                [
-                    'field' => 'customer',
-                    'value' => $ticket->getCustomerName(),
-                ],
-                [
-                    'field' => 'status',
-                    'value' => $ticket->getStatus()->getName(),
-                ],
-                [
-                    'field' => 'priority',
-                    'value' => $ticket->getPriority()->getName(),
-                ],
-            ],
-            'sections' => $sections,
-            'relations' => [
-                [
-                    'customer' => $ticket->getCustomerId(),
-                ],
-                [
-                    'order' => $ticket->getOrderId(),
-                ],
-            ],
-        ];
     }
 }

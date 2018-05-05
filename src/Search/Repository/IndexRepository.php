@@ -3,9 +3,11 @@
 namespace Mulwi\Search\Repository;
 
 use Magento\Framework\ObjectManagerInterface;
+use Mulwi\Search\Api\Data\IndexInterface;
+use Mulwi\Search\Api\Repository\IndexRepositoryInterface;
 use Mulwi\Search\Index\AbstractIndex;
 
-class IndexRepository
+class IndexRepository implements IndexRepositoryInterface
 {
     /**
      * @var AbstractIndex[]
@@ -14,7 +16,8 @@ class IndexRepository
 
     public function __construct(
         array $indexes = []
-    ) {
+    )
+    {
         $this->indexes = $indexes;
     }
 
@@ -24,6 +27,21 @@ class IndexRepository
     public function getIndexes()
     {
         return $this->indexes;
+    }
+
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getIndex($identifier)
+    {
+        foreach ($this->getIndexes() as $index) {
+            if ($index->getIdentifier() === $identifier) {
+                return $index;
+            }
+        }
+
+        throw new \Exception("Undefined index");
     }
 
     public function updateDocument($object)

@@ -6,32 +6,50 @@ use Mulwi\Search\Index\AbstractIndex;
 
 class CustomerIndex extends AbstractIndex
 {
-    const IDENTIFIER = 'customer';
-
+    const IDENTIFIER = 'Customer';
 
     public function getIdentifier()
     {
         return self::IDENTIFIER;
     }
 
-    public function getEntities($lastEntityId = null, $limit = 100)
+    public function getQueueValue($entity)
     {
-        /** @var \Magento\Customer\Model\ResourceModel\Customer\Collection $collection */
-        $collection = $this->context->objectManager->create('Magento\Customer\Model\ResourceModel\Customer\Collection');
-        $collection->setPageSize($limit);
-        $collection->addFieldToFilter('entity_id', ['gt' => $lastEntityId]);
-
-        return $collection;
+        if ($entity instanceof \Magento\Customer\Model\Customer) {
+            return $entity->getId();
+        }
     }
 
+    public function getDocuments($lastId = null)
+    {
+        /** @var \Magento\Customer\Model\ResourceModel\Customer\Collection $collection */
+        $collection = $this->context->create('Magento\Customer\Model\ResourceModel\Customer\Collection');
+        $collection->setPageSize(100)
+            ->addFieldToFilter('entity_id', ['gt' => $lastId]);
 
+        $docs = [];
+        foreach ($collection as $entity) {
+            $docs[] = $this->mapDocument($entity);
+        }
+
+        return $docs;
+    }
+
+    public function getDocument($id)
+    {
+        return $this->mapDocument(
+            $this->context->create('Magento\Customer\Model\Customer')
+                ->load($id)
+        );
+    }
+
+    /**
+     * @param \Magento\Customer\Model\Customer $customer
+     * @return \Mulwi\Search\Model\Document
+     */
     public function mapDocument($customer)
     {
-        /** @var \Magento\Customer\Model\Customer $customer */
-        $doc = $this->makeDocument(
-            'Customer',
-            $this->makeExtId(self::IDENTIFIER, $customer->getId())
-        );
+        $doc = $this->context->makeDocument(self::IDENTIFIER, $customer->getId());
 
         $doc->setTitle($customer->getName())
             ->setUrl($this->context->getUrl('customer/index/edit', ['id' => $customer->getId()]))

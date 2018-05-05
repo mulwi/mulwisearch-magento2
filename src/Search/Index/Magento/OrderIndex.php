@@ -2,37 +2,60 @@
 
 namespace Mulwi\Search\Index\Magento;
 
+use Mulwi\Search\Api\Data\DocumentInterface;
 use Mulwi\Search\Index\AbstractIndex;
 
 class OrderIndex extends AbstractIndex
 {
-    const IDENTIFIER = 'order';
+    const IDENTIFIER = 'Order';
 
     public function getIdentifier()
     {
         return self::IDENTIFIER;
     }
 
-    public function getEntities($lastEntityId = null, $limit = 100)
+    public function getQueueValue($entity)
+    {
+        if ($entity instanceof \Magento\Sales\Model\Order) {
+            return $entity->getId();
+        }
+
+        return false;
+    }
+
+    public function getDocuments($lastId = null)
     {
         /** @var \Magento\Sales\Model\ResourceModel\Order\Collection $collection */
-        $collection = $this->context->objectManager->create('Magento\Sales\Model\ResourceModel\Order\Collection');
-        $collection->setPageSize($limit);
-        $collection->addFieldToFilter('entity_id', ['gt' => $lastEntityId]);
+        $collection = $this->context->create('Magento\Sales\Model\ResourceModel\Order\Collection');
 
-        return $collection;
+        $collection->setPageSize(100)
+            ->addFieldToFilter('entity_id', ['gt' => intval($lastId)]);
+
+        $docs = [];
+        foreach ($collection as $entity) {
+            $docs[] = $this->mapDocument($entity);
+        }
+
+        return $docs;
+    }
+
+    public function getDocument($id)
+    {
+        return $this->mapDocument(
+            $this->context->create('Magento\Sales\Model\Order')
+                ->load($id)
+        );
     }
 
     /**
-     * {@inheritdoc}
+     * @param \Magento\Sales\Model\Order $order
+     * @return DocumentInterface
      */
-    public function mapDocument($order)
+    private function mapDocument($order)
     {
-        /** @var \Magento\Sales\Model\Order $order */
-
-        $doc = $this->makeDocument(
-            'Order',
-            $this->makeExtId(self::IDENTIFIER, $order->getId())
+        $doc = $this->context->makeDocument(
+            self::IDENTIFIER,
+            $order->getId()
         );
 
         $doc->setTitle('Order #' . $order->getIncrementId())
@@ -70,8 +93,8 @@ class OrderIndex extends AbstractIndex
 
         if ($order->getCustomerId()) {
             $doc->addRelation(
-                $this->getSource(),
-                $this->makeExtId(CustomerIndex::IDENTIFIER, $order->getCustomerId())
+                CustomerIndex::IDENTIFIER,
+                $order->getCustomerId()
             );
         } else {
             $doc->addMeta(
@@ -80,14 +103,14 @@ class OrderIndex extends AbstractIndex
             );
         }
 
-        $doc->addContent($order->getCustomerName());
-        $doc->addContent($order->getCustomerEmail());
+        $doc->addSearchable($order->getCustomerName())
+            ->addSearchable($order->getCustomerEmail());
 
         /** @var \Magento\Sales\Model\Order\Item $item */
         foreach ($order->getAllVisibleItems() as $item) {
             $doc->addRelation(
-                $this->getSource(),
-                $this->makeExtId(ProductIndex::IDENTIFIER, $item->getProductId())
+                ProductIndex::IDENTIFIER,
+                $item->getProductId()
             );
         }
 

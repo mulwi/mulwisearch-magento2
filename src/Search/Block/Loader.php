@@ -35,7 +35,7 @@ class Loader extends Template
 
     public function getLoaderUrl()
     {
-        return $this->getBaseUrl() . "/backend/static/loader.js";
+        return $this->getBaseUrl() . "/search/loader.js";
     }
 
     public function getBaseUrl()

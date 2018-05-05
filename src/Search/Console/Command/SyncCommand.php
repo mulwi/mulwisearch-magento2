@@ -2,6 +2,7 @@
 
 namespace Mulwi\Search\Console\Command;
 
+use Mulwi\Search\Cron\QueueCron;
 use Mulwi\Search\Repository\IndexRepository;
 use Mulwi\Search\Model\Config;
 use Symfony\Component\Console\Command\Command;
@@ -23,6 +24,11 @@ class SyncCommand extends Command
     private $config;
 
     /**
+     * @var QueueCron
+     */
+    private $queueCron;
+
+    /**
      * @var AppState
      */
     private $appState;
@@ -30,11 +36,13 @@ class SyncCommand extends Command
     public function __construct(
         IndexRepository $indexRepository,
         Config $config,
+        QueueCron $queueCron,
         AppState $appState
     )
     {
         $this->indexRepository = $indexRepository;
         $this->config = $config;
+        $this->queueCron = $queueCron;
         $this->appState = $appState;
 
         parent::__construct();
@@ -53,6 +61,7 @@ class SyncCommand extends Command
         $this->addArgument('index');
 
         $this->addOption('list');
+        $this->addOption('cron');
 
         parent::configure();
     }
@@ -65,7 +74,6 @@ class SyncCommand extends Command
         try {
             $this->appState->setAreaCode('global');
         } catch (\Exception $e) {
-
         }
 
         if (!$this->isValid($output)) {
@@ -78,6 +86,11 @@ class SyncCommand extends Command
             foreach ($indexes as $index) {
                 $output->writeln($index->getIdentifier());
             }
+            return;
+        }
+
+        if ($input->getOption('cron')) {
+            $this->queueCron->execute();
             return;
         }
 

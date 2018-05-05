@@ -2,11 +2,12 @@
 
 namespace Mulwi\Search\Index\Magento;
 
+use Mulwi\Search\Api\Data\DocumentInterface;
 use Mulwi\Search\Index\AbstractIndex;
 
 class ProductIndex extends AbstractIndex
 {
-    const IDENTIFIER = 'product';
+    const IDENTIFIER = 'Product';
 
 
     public function getIdentifier()
@@ -14,35 +15,44 @@ class ProductIndex extends AbstractIndex
         return self::IDENTIFIER;
     }
 
-    public function getIndexableClasses()
+    public function getQueueValue($entity)
     {
-        return [
-            \Magento\Catalog\Model\Product::class,
-        ];
+        if ($entity instanceof \Magento\Catalog\Model\Product) {
+            return $entity->getId();
+        }
     }
 
-    public function getEntities($lastEntityId = null, $limit = 100)
+    public function getDocuments($lastId = null)
     {
         /** @var \Magento\Catalog\Model\ResourceModel\Product\Collection $collection */
-        $collection = $this->context->objectManager->create('Magento\Catalog\Model\ResourceModel\Product\Collection');
+        $collection = $this->context->create('Magento\Catalog\Model\ResourceModel\Product\Collection');
+        $collection->setPageSize(100)
+            ->addFieldToFilter('entity_id', ['gt' => $lastId])
+            ->addAttributeToSelect('name');
 
-        $collection->setPageSize($limit);
-        $collection->addFieldToFilter('entity_id', ['gt' => $lastEntityId]);
-        $collection->addAttributeToSelect('name');
+        $docs = [];
+        foreach ($collection as $entity) {
+            $docs[] = $this->mapDocument($entity);
+        }
 
-        return $collection;
+        return $docs;
     }
 
-
-    public function mapDocument($product)
+    public function getDocument($id)
     {
-        /** @var \Magento\Catalog\Model\Product $product */
-
-        $doc = $this->makeDocument(
-            'Product',
-            $this->makeExtId(self::IDENTIFIER, $product->getId())
+        return $this->mapDocument(
+            $this->context->create('Magento\Catalog\Model\Product')
+                ->load($id)
         );
+    }
 
+    /**
+     * @param \Magento\Catalog\Model\Product $product
+     * @return DocumentInterface
+     */
+    private function mapDocument($product)
+    {
+        $doc = $this->context->makeDocument(self::IDENTIFIER, $product->getId());
 
         $doc->setTitle($product->getName())
             ->setUrl($this->context->getUrl('catalog/product/edit', ['id' => $product->getId()]))
@@ -57,10 +67,7 @@ class ProductIndex extends AbstractIndex
         );
 
         foreach ($product->getCategoryIds() as $categoryId) {
-            $doc->addRelation(
-                $this->getSource(),
-                $this->makeExtId(CategoryIndex::IDENTIFIER, $categoryId)
-            );
+            $doc->addRelation(CategoryIndex::IDENTIFIER, $categoryId);
         }
 
         return $doc;

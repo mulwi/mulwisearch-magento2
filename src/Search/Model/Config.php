@@ -7,6 +7,8 @@ use Magento\Framework\Encryption\EncryptorInterface;
 
 class Config
 {
+    const SOURCE = 'Magento';
+
     /**
      * @var ScopeConfigInterface
      */

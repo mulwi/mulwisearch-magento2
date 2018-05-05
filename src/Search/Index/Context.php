@@ -7,6 +7,7 @@ use Mulwi\Search\Model\Config;
 use Magento\Framework\Pricing\PriceCurrencyInterface;
 use Magento\Framework\ObjectManagerInterface;
 use Magento\Framework\Module\ModuleListInterface;
+use Mulwi\Search\Model\Document;
 
 class Context
 {
@@ -14,11 +15,6 @@ class Context
      * @var \Mulwi\Client
      */
     private $client;
-
-    /**
-     * @var Config
-     */
-    private $config;
 
     /**
      * @var PriceCurrencyInterface
@@ -66,6 +62,30 @@ class Context
     public function getClient()
     {
         return $this->client;
+    }
+
+    /**
+     * @param string $class
+     * @return object
+     */
+    public function create($class)
+    {
+        return $this->objectManager->create($class);
+    }
+
+    /**
+     * @param string$kind
+     * @param string $id
+     * @return Document
+     */
+    public function makeDocument($kind, $id)
+    {
+        $doc = new Document();
+        $doc->setKind($kind)
+            ->setId($id)
+            ->setExtID($kind . '_' . $id);
+
+        return $doc;
     }
 
     /**

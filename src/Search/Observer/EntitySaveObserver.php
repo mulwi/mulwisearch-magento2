@@ -15,6 +15,6 @@ class EntitySaveObserver extends AbstractObserver implements ObserverInterface
         /** @var \Magento\Framework\Model\AbstractModel $object */
         $object = $observer->getEntity();
 
-        $this->indexRepository->updateDocument($object);
+        $this->queueService->updateDocument($object);
     }
 }
