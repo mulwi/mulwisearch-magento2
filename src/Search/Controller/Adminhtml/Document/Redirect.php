@@ -15,8 +15,7 @@ class Redirect extends Action
     {
         $path = $this->getRequest()->getParam('path');
         $params = $this->getRequest()->getParam('params');
-        echo $path;
-        die();
+
         return $this->_redirect($path, $params);
     }
 

@@ -87,6 +87,17 @@ class TicketIndex extends AbstractIndex
 
         $doc->addRelation(CustomerIndex::IDENTIFIER, $ticket->getCustomerId());
 
+        foreach ($ticket->getMessages() as $message) {
+            $mDoc = $this->context->makeDocument("Message", $message->getId());
+            $mDoc->setContent($message->getBody());
+            $mDoc->setCreatedAt($message->getCreatedAt());
+            $mDoc->addMeta(
+                'Author',
+                $message->getFrontendUserName()
+            );
+            $doc->addDocument($mDoc);
+        }
+        
         return $doc;
     }
 }

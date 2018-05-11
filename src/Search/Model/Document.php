@@ -12,6 +12,7 @@ class Document extends DataObject implements DocumentInterface
         $data['source'] = Config::SOURCE;
         $data['meta'] = [];
         $data['relations'] = [];
+        $data['documents'] = [];
 
         parent::__construct($data);
     }
@@ -34,6 +35,11 @@ class Document extends DataObject implements DocumentInterface
     public function setTitle($value)
     {
         return $this->setData('title', $value);
+    }
+
+    public function setContent($value)
+    {
+        return $this->setData('content', $value);
     }
 
     public function setUrl($value)
@@ -85,6 +91,14 @@ class Document extends DataObject implements DocumentInterface
         ];
 
         return $this->setData('relations', $relations);
+    }
+
+    public function addDocument(DocumentInterface $doc)
+    {
+        $documents = $this->getData('documents');
+        $documents[] = $doc->getData();
+
+        return $this->setData('documents', $documents);
     }
 
     public function addSearchable($content)

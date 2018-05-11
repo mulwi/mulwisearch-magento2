@@ -12,8 +12,4 @@
     <event name="entity_manager_save_before">
         <observer name="mulwi_entity_save_after" instance="Mulwi\Search\Observer\EntitySaveObserver"/>
     </event>
-
-    <event name="entity_manager_delete_before">
-        <observer name="mulwi_entity_save_after" instance="Mulwi\Search\Observer\EntityDeleteObserver"/>
-    </event>
 </config>
